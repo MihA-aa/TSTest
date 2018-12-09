@@ -1,0 +1,9 @@
+.radio{
+    cursor: pointer;
+    margin: 10px 0;
+    display: table;
+    padding: 4px;
+    background: #9e9e9e40;
+	border: 1px solid #9e9e9e40;
+    border-radius: 5px;
+}
