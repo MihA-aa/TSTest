@@ -4,14 +4,12 @@ import './styles.css';
 
 export const Buttons = (props) => {
     const {
-        currentStep,
-        stepsCount,
+        previousButtonIsVisible,
+        nextButtonIsVisible,
         nextButtonIsDisable,
         nextButtonOnClick,
         previousButtonOnClick
     } = props
-    const previousButtonIsVisible = currentStep !== 1;
-    const nextButtonIsVisible = currentStep <= stepsCount;
     return (
         <div className='buttons'>
             {previousButtonIsVisible &&

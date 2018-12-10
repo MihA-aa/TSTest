@@ -14,53 +14,55 @@ export default class Wizard extends React.Component {
 		this.steps = this.props.steps;
 		this.data = this.props.data;
         this.state = {
-            currentStep: 1,
+            currentStepNumber: 1,
             model: helpers.getModelFromSteps(this.steps)
         };
     }
     
 	getCurrentStep = () =>
-		this.steps.find(step => step.order === this.state.currentStep);
+		this.steps.find(step => step.order === this.state.currentStepNumber);
 
-    currentStepIsDirty = () =>
-        this.getCurrentStep() && this.state.model[this.getCurrentStep().type];
+    currentStepIsDirty = () => 
+        this.state.currentStepNumber > this.steps.length
+        || this.getFilteredOptions().includes(this.state.model[this.currentStep.type]);
     
     nextStep = () => {
-        this.setState((prevState) => ({ currentStep: ++prevState.currentStep }))
+        this.setState((prevState) => ({ currentStepNumber: ++prevState.currentStepNumber }))
     };
 
     previousStep = () => {
-        this.setState((prevState) => ({ currentStep: --prevState.currentStep }));
+        this.setState((prevState) => ({ currentStepNumber: --prevState.currentStepNumber }));
     }
 
     setStepValue = value => {
         this.setState((prevState) => ({
-            model: { ...prevState.model, [this.getCurrentStep().type]: value}
+            model: { ...prevState.model, [this.currentStep.type]: value}
         }));
     }
 
     getTitle = () =>
-        this.state.currentStep > this.steps.length
+        this.state.currentStepNumber > this.steps.length
             ? 'Result'
-            : this.getCurrentStep().type;
+            : this.currentStep.type;
 
     render(){
-        console.log(this.state.model);
+        this.currentStep = this.getCurrentStep();
         return (
             <div id='wizard'>
                 <fieldset>
 		            <legend>{this.getTitle()}</legend>
-                    {this.state.currentStep <= this.steps.length
+                    {this.state.currentStepNumber <= this.steps.length
                         ? <Step
                             options={this.getFilteredOptions()}
                             setStepValue={this.setStepValue}
+                            stepValue={this.state.model[this.currentStep.type]}
                         />
                         : <Result model={this.state.model}/>
                     }
                 </fieldset>
                 <Buttons
-                    currentStep={this.state.currentStep}
-                    stepsCount={this.steps.length}
+                    previousButtonIsVisible={this.state.currentStepNumber !== 1}
+                    nextButtonIsVisible={this.state.currentStepNumber <= this.steps.length}
                     nextButtonIsDisable={!this.currentStepIsDirty()}
                     nextButtonOnClick={this.nextStep}
                     previousButtonOnClick={this.previousStep}
@@ -72,11 +74,10 @@ export default class Wizard extends React.Component {
     getFilteredOptions(){
 		let options = this.data;
 		let filterModel = {};
-		const currentStep = this.getCurrentStep();
 		var filterTypes = this.steps
-			.filter(step => step.order < currentStep.order)
+			.filter(step => step.order < this.currentStep.order)
 			.map(step => step.type);
-		filterTypes.forEach(filter => { filterModel[filter] = this.state.model[filter] })
+		filterTypes.forEach(filter => { filterModel[filter] = this.state.model[filter] });
 
         const firstFilterKey = Object.keys(filterModel)[0];
         if(firstFilterKey && filterModel[firstFilterKey]){
@@ -84,7 +85,7 @@ export default class Wizard extends React.Component {
         }
         
         return options
-            .map(model => model[currentStep.type].value)
+            .map(model => model[this.currentStep.type].value)
             .filter(helpers.distinct);
     }
 }

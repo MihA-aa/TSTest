@@ -1,7 +1,0 @@
-input[type=radio]{
-	display:none;
-}
-
-input[type=radio]:checked + .radio{
-	border: 1px solid black;
-}
