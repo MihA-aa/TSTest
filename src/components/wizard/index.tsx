@@ -1,14 +1,29 @@
-import React from 'react'
+import React, { ReactNode } from 'react'
 
 import { Step } from '../step'
 import  * as helpers from '../../helpers'
 import { Buttons } from '../buttons'
 import { Result } from '../result'
+import { Step as StepModel, Car } from '../../data';
 
 import './styles.css'
 
-export default class Wizard extends React.Component {
-    constructor(props){
+interface WizardProps {
+    steps: StepModel[];
+    data: Car[];
+}
+
+interface WizardState {
+    currentStepNumber: number;
+    model: any
+}
+
+export default class Wizard extends React.Component<WizardProps, WizardState> {
+    private steps: StepModel[];
+    private data: Car[];
+    private currentStep: StepModel;
+
+    constructor(props: WizardProps) {
         super(props);
         
 		this.steps = this.props.steps;
@@ -17,35 +32,36 @@ export default class Wizard extends React.Component {
             currentStepNumber: 1,
             model: helpers.getModelFromSteps(this.steps)
         };
+        this.currentStep = this.getCurrentStep();
     }
     
-	getCurrentStep = () =>
-		this.steps.find(step => step.order === this.state.currentStepNumber);
+	getCurrentStep = (): StepModel =>
+		this.steps.find(step => step.order === this.state.currentStepNumber)!;
 
-    currentStepIsDirty = () => 
+    currentStepIsDirty = (): boolean => 
         this.state.currentStepNumber > this.steps.length
         || this.getFilteredOptions().includes(this.state.model[this.currentStep.type]);
     
-    nextStep = () => {
-        this.setState((prevState) => ({ currentStepNumber: ++prevState.currentStepNumber }))
+    nextStep = (): void => {
+        this.setState((prevState) => ({ currentStepNumber: prevState.currentStepNumber + 1 }))
     };
 
-    previousStep = () => {
-        this.setState((prevState) => ({ currentStepNumber: --prevState.currentStepNumber }));
+    previousStep = (): void => {
+        this.setState((prevState) => ({ currentStepNumber: prevState.currentStepNumber - 1 }));
     }
 
-    setStepValue = value => {
+    setStepValue = (value: string) => (): void => {
         this.setState((prevState) => ({
             model: { ...prevState.model, [this.currentStep.type]: value}
         }));
     }
 
-    getTitle = () =>
+    getTitle = (): string =>
         this.state.currentStepNumber > this.steps.length
             ? 'Result'
             : this.currentStep.type;
 
-    render(){
+    render(): ReactNode {
         this.currentStep = this.getCurrentStep();
         return (
             <div id='wizard'>
@@ -73,7 +89,7 @@ export default class Wizard extends React.Component {
     
     getFilteredOptions(){
 		let options = this.data;
-		let filterModel = {};
+		let filterModel: any = {};
 		var filterTypes = this.steps
 			.filter(step => step.order < this.currentStep.order)
 			.map(step => step.type);
@@ -85,7 +101,7 @@ export default class Wizard extends React.Component {
         }
         
         return options
-            .map(model => model[this.currentStep.type].value)
+            .map((model: any) => model[this.currentStep.type.toLowerCase()])
             .filter(helpers.distinct);
     }
 }

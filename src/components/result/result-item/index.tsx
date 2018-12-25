@@ -2,7 +2,12 @@ import React from 'react'
 
 import './styles.css'
 
-export const ResultItem = ({value, type}) => 
+interface ResultItemProps {
+    value: string;
+    type: string;
+}
+
+export const ResultItem : React.SFC<ResultItemProps> = ({value, type}) => 
     <div>
         <label className='result-label' htmlFor={value}>
             {type}:
